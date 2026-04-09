@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Vagas SAP Remotas</title>
+    <title>Portal de Vagas SAP Remotas (Versão API)</title>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -82,6 +82,23 @@
             border-color: var(--primary-color);
         }
 
+        .search-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: auto;
+        }
+
+        .search-btn:hover {
+            background-color: #004494;
+        }
+
         .jobs-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -153,15 +170,11 @@
             font-weight: bold;
             transition: background-color 0.3s;
             text-align: center;
+            width: 100%;
         }
 
         .apply-btn:hover {
             background-color: #004494;
-        }
-
-        .apply-btn.applied {
-            background-color: #28a745;
-            cursor: default;
         }
 
         .no-results {
@@ -170,6 +183,20 @@
             padding: 2rem;
             font-size: 1.2rem;
             color: #777;
+            background: var(--card-bg);
+            border-radius: 8px;
+        }
+
+        .api-warning {
+            grid-column: 1 / -1;
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -177,51 +204,42 @@
 
     <header>
         <h1>Vagas SAP Remotas</h1>
-        <p>Encontre a sua próxima oportunidade global no ecossistema SAP</p>
+        <p>Buscador Integrado de Oportunidades Globais</p>
     </header>
 
     <div class="container">
+        
+        <div class="api-warning">
+            <strong>Aviso de Desenvolvimento:</strong> O código está configurado para buscar em uma API externa. Para ver dados reais, insira a URL e a API Key do seu provedor (como Adzuna, JSearch, etc.) no arquivo JavaScript.
+        </div>
+
         <div class="filters">
             <div class="filter-group">
-                <label for="search">Buscar (Cargo ou Empresa)</label>
-                <input type="text" id="search" placeholder="Ex: Desenvolvedor ABAP...">
+                <label for="search">Palavra-chave</label>
+                <input type="text" id="search" placeholder="Ex: SAP FI, ABAP...">
             </div>
             
             <div class="filter-group">
-                <label for="module">Módulo SAP</label>
-                <select id="module">
-                    <option value="">Todos os Módulos</option>
-                    <option value="FI">FI</option>
-                    <option value="CO">CO</option>
-                    <option value="ABAP">ABAP</option>
-                    <option value="MM/SD">MM/SD</option>
-                    <option value="S/4HANA">S/4HANA</option>
-                    <option value="Basis">Basis</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
                 <label for="country">País</label>
                 <select id="country">
-                    <option value="">Todos os Países</option>
-                    <option value="Brasil">Brasil</option>
-                    <option value="EUA">EUA</option>
-                    <option value="Portugal">Portugal</option>
-                    <option value="Espanha">Espanha</option>
+                    <option value="">Qualquer Local</option>
+                    <option value="br">Brasil</option>
+                    <option value="us">Estados Unidos</option>
+                    <option value="pt">Portugal</option>
+                    <option value="es">Espanha</option>
                 </select>
             </div>
 
             <div class="filter-group">
-                <label for="state">Estado/Região</label>
-                <select id="state">
-                    <option value="">Todos os Estados</option>
-                    <option value="São Paulo">São Paulo</option>
-                    <option value="Rio de Janeiro">Rio de Janeiro</option>
-                    <option value="Minas Gerais">Minas Gerais</option>
-                    <option value="Califórnia">Califórnia</option>
-                    <option value="Lisboa">Lisboa</option>
-                    <option value="Madrid">Madrid</option>
+                <label for="remote">Formato</label>
+                <select id="remote">
+                    <option value="true">Apenas Remoto</option>
+                    <option value="false">Presencial e Remoto</option>
                 </select>
+            </div>
+
+            <div class="filter-group">
+                <button class="search-btn" onclick="fetchRealJobs()">Buscar Vagas</button>
             </div>
         </div>
 
@@ -230,84 +248,98 @@
     </div>
 
     <script>
-        // Base de dados fictícia
-        const jobsData = [
-            { id: 1, titulo: "Consultor SAP FI Sênior", empresa: "TechSolutions", pais: "Brasil", estado: "São Paulo", salario: "R$ 15.000 - R$ 18.000", modulo: "FI" },
-            { id: 2, titulo: "Desenvolvedor ABAP Pleno", empresa: "Global TI", pais: "Brasil", estado: "Rio de Janeiro", salario: "R$ 10.000 - R$ 13.000", modulo: "ABAP" },
-            { id: 3, titulo: "Consultor SAP MM/SD", empresa: "Logística SA", pais: "Portugal", estado: "Lisboa", salario: "€ 3.000 - € 4.500", modulo: "MM/SD" },
-            { id: 4, titulo: "Arquiteto de Soluções SAP (S/4HANA)", empresa: "Consultoria Enterprise", pais: "EUA", estado: "Califórnia", salario: "U$ 6.000 - U$ 8.000", modulo: "S/4HANA" },
-            { id: 5, titulo: "Consultor SAP CO Especialista", empresa: "FinTech Br", pais: "Brasil", estado: "Minas Gerais", salario: "R$ 16.000 - R$ 20.000", modulo: "CO" },
-            { id: 6, titulo: "Analista de Suporte SAP (Basis)", empresa: "Infra Cloud Corp", pais: "Espanha", estado: "Madrid", salario: "€ 2.500 - € 3.500", modulo: "Basis" }
-        ];
-
         // Elementos do DOM
         const jobsContainer = document.getElementById('jobs-container');
         const searchInput = document.getElementById('search');
-        const moduleSelect = document.getElementById('module');
         const countrySelect = document.getElementById('country');
-        const stateSelect = document.getElementById('state');
+        const remoteSelect = document.getElementById('remote');
 
-        // Função para renderizar as vagas
+        // Função para buscar vagas na API Real
+        async function fetchRealJobs() {
+            // Mostra status de carregamento
+            jobsContainer.innerHTML = '<div class="no-results">Buscando vagas nos portais de emprego... ⏳</div>';
+
+            const termoDeBusca = searchInput.value || "SAP";
+            const pais = countrySelect.value;
+            const apenasRemoto = remoteSelect.value;
+
+            /* ATENÇÃO - CONFIGURAÇÃO DA API:
+               Substitua a URL abaixo pela documentação da API que você escolher.
+               Geralmente, você passa os filtros na própria URL (Query Params).
+            */
+            const apiUrl = `https://api.exemplo-de-vagas.com/search?query=${encodeURIComponent(termoDeBusca)}&country=${pais}&remote=${apenasRemoto}`;
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        // Substitua pela sua chave real gerada no site da API
+                        'Authorization': 'Bearer SUA_API_KEY_AQUI', 
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Falha de autenticação ou limite de requisições excedido na API.');
+                }
+
+                const data = await response.json();
+                
+                // Mapeie 'data.resultados' de acordo com o que a sua API específica retorna
+                renderJobs(data.resultados); 
+
+            } catch (error) {
+                console.error("Erro na busca:", error);
+                jobsContainer.innerHTML = `
+                    <div class="no-results">
+                        <strong>Erro ao conectar com a API de Vagas.</strong><br><br>
+                        Detalhe: ${error.message}<br>
+                        <em>Lembrete: Você precisa configurar uma API Key válida no código-fonte (linha 183).</em>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para renderizar os resultados que voltam da API
         function renderJobs(jobs) {
             jobsContainer.innerHTML = '';
 
-            if (jobs.length === 0) {
-                jobsContainer.innerHTML = '<div class="no-results">Nenhuma vaga encontrada com estes filtros. Tente novamente!</div>';
+            // Se a API não retornar nada ou vier vazia
+            if (!jobs || jobs.length === 0) {
+                jobsContainer.innerHTML = '<div class="no-results">Nenhuma vaga encontrada para estes critérios. Tente mudar a busca.</div>';
                 return;
             }
 
             jobs.forEach(job => {
                 const card = document.createElement('div');
                 card.className = 'job-card';
+                
+                // Adapte as variáveis (job.titulo, job.empresa) de acordo com o padrão da API que você usar
                 card.innerHTML = `
-                    <div class="tag">${job.modulo}</div>
-                    <h2 class="job-title">${job.titulo}</h2>
-                    <h3 class="job-company">${job.empresa}</h3>
+                    <div class="tag">Vaga Externa</div>
+                    <h2 class="job-title">${job.titulo || 'Título Indisponível'}</h2>
+                    <h3 class="job-company">${job.empresa || 'Empresa Confidencial'}</h3>
                     <div class="job-details">
-                        <p><strong>📍 Local:</strong> ${job.pais} - ${job.estado}</p>
-                        <p><strong>💰 Salário:</strong> ${job.salario}</p>
-                        <p><strong>🌐 Formato:</strong> 100% Remoto</p>
+                        <p><strong>📍 Local:</strong> ${job.localizacao || 'Não informado'}</p>
+                        <p><strong>📅 Publicado em:</strong> ${job.data_publicacao || 'Recente'}</p>
                     </div>
-                    <button class="apply-btn" onclick="applyToJob(this)">Candidatar-se</button>
+                    <a href="${job.url_da_vaga}" target="_blank" style="text-decoration: none;">
+                        <button class="apply-btn">Ver Detalhes e Aplicar</button>
+                    </a>
                 `;
                 jobsContainer.appendChild(card);
             });
         }
 
-        // Função para filtrar as vagas
-        function filterJobs() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const moduleFilter = moduleSelect.value;
-            const countryFilter = countrySelect.value;
-            const stateFilter = stateSelect.value;
+        // Permite buscar apertando "Enter" no teclado
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                fetchRealJobs();
+            }
+        });
 
-            const filteredJobs = jobsData.filter(job => {
-                const matchSearch = job.titulo.toLowerCase().includes(searchTerm) || job.empresa.toLowerCase().includes(searchTerm);
-                const matchModule = moduleFilter === "" || job.modulo === moduleFilter;
-                const matchCountry = countryFilter === "" || job.pais === countryFilter;
-                const matchState = stateFilter === "" || job.estado === stateFilter;
-
-                return matchSearch && matchModule && matchCountry && matchState;
-            });
-
-            renderJobs(filteredJobs);
-        }
-
-        // Função para simular a candidatura
-        function applyToJob(button) {
-            button.textContent = "Candidatura Enviada ✔";
-            button.classList.add("applied");
-            button.disabled = true;
-        }
-
-        // Adicionar event listeners aos filtros
-        searchInput.addEventListener('input', filterJobs);
-        moduleSelect.addEventListener('change', filterJobs);
-        countrySelect.addEventListener('change', filterJobs);
-        stateSelect.addEventListener('change', filterJobs);
-
-        // Renderização inicial
-        renderJobs(jobsData);
+        // Simula uma busca inicial para mostrar a tela de erro/aviso da API
+        fetchRealJobs();
     </script>
 </body>
 </html>

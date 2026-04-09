@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Vagas SAP Remotas</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f4f7f6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --tag-bg: #e2e8f0;
+            --tag-text: #4a5568;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        input, select {
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .job-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .job-title {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .job-company {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .job-details {
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .job-details p {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .job-details p strong {
+            margin-right: 5px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: var(--tag-bg);
+            color: var(--tag-text);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .apply-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .apply-btn:hover {
+            background-color: #004494;
+        }
+
+        .apply-btn.applied {
+            background-color: #28a745;
+            cursor: default;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Vagas SAP Remotas</h1>
+        <p>Encontre a sua próxima oportunidade global no ecossistema SAP</p>
+    </header>
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-group">
+                <label for="search">Buscar (Cargo ou Empresa)</label>
+                <input type="text" id="search" placeholder="Ex: Desenvolvedor ABAP...">
+            </div>
+            
+            <div class="filter-group">
+                <label for="module">Módulo SAP</label>
+                <select id="module">
+                    <option value="">Todos os Módulos</option>
+                    <option value="FI">FI</option>
+                    <option value="CO">CO</option>
+                    <option value="ABAP">ABAP</option>
+                    <option value="MM/SD">MM/SD</option>
+                    <option value="S/4HANA">S/4HANA</option>
+                    <option value="Basis">Basis</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="country">País</label>
+                <select id="country">
+                    <option value="">Todos os Países</option>
+                    <option value="Brasil">Brasil</option>
+                    <option value="EUA">EUA</option>
+                    <option value="Portugal">Portugal</option>
+                    <option value="Espanha">Espanha</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="state">Estado/Região</label>
+                <select id="state">
+                    <option value="">Todos os Estados</option>
+                    <option value="São Paulo">São Paulo</option>
+                    <option value="Rio de Janeiro">Rio de Janeiro</option>
+                    <option value="Minas Gerais">Minas Gerais</option>
+                    <option value="Califórnia">Califórnia</option>
+                    <option value="Lisboa">Lisboa</option>
+                    <option value="Madrid">Madrid</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="jobs-grid" id="jobs-container">
+            </div>
+    </div>
+
+    <script>
+        // Base de dados fictícia
+        const jobsData = [
+            { id: 1, titulo: "Consultor SAP FI Sênior", empresa: "TechSolutions", pais: "Brasil", estado: "São Paulo", salario: "R$ 15.000 - R$ 18.000", modulo: "FI" },
+            { id: 2, titulo: "Desenvolvedor ABAP Pleno", empresa: "Global TI", pais: "Brasil", estado: "Rio de Janeiro", salario: "R$ 10.000 - R$ 13.000", modulo: "ABAP" },
+            { id: 3, titulo: "Consultor SAP MM/SD", empresa: "Logística SA", pais: "Portugal", estado: "Lisboa", salario: "€ 3.000 - € 4.500", modulo: "MM/SD" },
+            { id: 4, titulo: "Arquiteto de Soluções SAP (S/4HANA)", empresa: "Consultoria Enterprise", pais: "EUA", estado: "Califórnia", salario: "U$ 6.000 - U$ 8.000", modulo: "S/4HANA" },
+            { id: 5, titulo: "Consultor SAP CO Especialista", empresa: "FinTech Br", pais: "Brasil", estado: "Minas Gerais", salario: "R$ 16.000 - R$ 20.000", modulo: "CO" },
+            { id: 6, titulo: "Analista de Suporte SAP (Basis)", empresa: "Infra Cloud Corp", pais: "Espanha", estado: "Madrid", salario: "€ 2.500 - € 3.500", modulo: "Basis" }
+        ];
+
+        // Elementos do DOM
+        const jobsContainer = document.getElementById('jobs-container');
+        const searchInput = document.getElementById('search');
+        const moduleSelect = document.getElementById('module');
+        const countrySelect = document.getElementById('country');
+        const stateSelect = document.getElementById('state');
+
+        // Função para renderizar as vagas
+        function renderJobs(jobs) {
+            jobsContainer.innerHTML = '';
+
+            if (jobs.length === 0) {
+                jobsContainer.innerHTML = '<div class="no-results">Nenhuma vaga encontrada com estes filtros. Tente novamente!</div>';
+                return;
+            }
+
+            jobs.forEach(job => {
+                const card = document.createElement('div');
+                card.className = 'job-card';
+                card.innerHTML = `
+                    <div class="tag">${job.modulo}</div>
+                    <h2 class="job-title">${job.titulo}</h2>
+                    <h3 class="job-company">${job.empresa}</h3>
+                    <div class="job-details">
+                        <p><strong>📍 Local:</strong> ${job.pais} - ${job.estado}</p>
+                        <p><strong>💰 Salário:</strong> ${job.salario}</p>
+                        <p><strong>🌐 Formato:</strong> 100% Remoto</p>
+                    </div>
+                    <button class="apply-btn" onclick="applyToJob(this)">Candidatar-se</button>
+                `;
+                jobsContainer.appendChild(card);
+            });
+        }
+
+        // Função para filtrar as vagas
+        function filterJobs() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const moduleFilter = moduleSelect.value;
+            const countryFilter = countrySelect.value;
+            const stateFilter = stateSelect.value;
+
+            const filteredJobs = jobsData.filter(job => {
+                const matchSearch = job.titulo.toLowerCase().includes(searchTerm) || job.empresa.toLowerCase().includes(searchTerm);
+                const matchModule = moduleFilter === "" || job.modulo === moduleFilter;
+                const matchCountry = countryFilter === "" || job.pais === countryFilter;
+                const matchState = stateFilter === "" || job.estado === stateFilter;
+
+                return matchSearch && matchModule && matchCountry && matchState;
+            });
+
+            renderJobs(filteredJobs);
+        }
+
+        // Função para simular a candidatura
+        function applyToJob(button) {
+            button.textContent = "Candidatura Enviada ✔";
+            button.classList.add("applied");
+            button.disabled = true;
+        }
+
+        // Adicionar event listeners aos filtros
+        searchInput.addEventListener('input', filterJobs);
+        moduleSelect.addEventListener('change', filterJobs);
+        countrySelect.addEventListener('change', filterJobs);
+        stateSelect.addEventListener('change', filterJobs);
+
+        // Renderização inicial
+        renderJobs(jobsData);
+    </script>
+</body>
+</html>
